@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="../js/jquery-1.7.2.min.js"></script>
+	</head>
+	<body>
+		<ul>
+		    <li>
+		        <a href="http://www.webo.com/liuwayong">我的微博</a>
+		    </li>
+		    <li>
+		        <a href="http://http://www.cnblogs.com/Wayou/">我的博客</a>
+		    </li>
+		    <li>
+		        <a href="http://wayouliu.duapp.com/">我的小站</a>
+		    </li>
+		</ul>
+		<p>这是p标签不是a标签，我不会受影响</p>
+
+		<script>
+			/*第一种方式
+			 通过$.extend()来扩展jQuery
+			
+			通过$.widget()应用jQuery UI的部件工厂方式创建*/
+			/*实例1*/
+			$.extend({
+			    sayHello: function(name) {
+			        console.log('Hello,' + (name ? name : 'Dude') + '!');
+			    }
+			})
+			$.sayHello(); //调用
+			$.sayHello('Wayou'); //带参调用
+			/*实例2*/
+			$.extend({
+			    log: function(message) {
+			        var now = new Date(),
+			            y = now.getFullYear(),
+			            m = now.getMonth() + 1, //！JavaScript中月分是从0开始的
+			            d = now.getDate(),
+			            h = now.getHours(),
+			            min = now.getMinutes(),
+			            s = now.getSeconds(),
+			            time = y + '/' + m + '/' + d + ' ' + h + ':' + min + ':' + s;
+			        console.log(time + ' My App: ' + message);
+			    }
+			})
+			$.log('initializing...'); //调用
+			
+			/*第二种方式
+			 通过$.fn 向jQuery添加新的方法
+			 基本上就是往$.fn上面添加一个方法，名字是我们的插件名称。然后我们的插件代码在这个方法里面展开*/
+			/*$.fn.myPlugin = function() {
+				//在这里面,this指的是用jQuery选中的元素
+				example :$('a'),则this=$('a')
+			 	this.css('color', 'red');
+				//当前a标签后面加地址链接
+				this.each(function() {
+				//对每个元素进行操作
+			 	$(this).append(' ' + $(this).attr('href'));
+			});
+				//支持链式调用 同上
+				return this.each(function() {
+				//对每个元素进行操作
+			 	$(this).append(' ' + $(this).attr('href'));
+			})
+			}
+			$(function(){
+		      $('a').myPlugin();
+		    })*/
+			 
+			/*让插件接收参数*/
+		/*	$.fn.myPlugin = function(options) {
+				  var defaults = {
+				      'color': 'red',
+				      'fontSize': '12px'
+				  };
+				  var settings = $.extend(defaults, options);
+				  return this.css({
+				      'color': settings.color,
+				     'fontSize': settings.fontSize
+				 });
+			}*/
+			//保护默认参数
+		/*	$.fn.myPlugin = function(options) {
+			    var defaults = {
+			        'color': 'red',
+			        'fontSize': '12px'
+			    };
+			    var settings = $.extend({},defaults, options);//将一个空对象做为第一个参数
+			    return this.css({
+			        'color': settings.color,
+			        'fontSize': settings.fontSize
+			    });
+			}*/
+			
+			
+			//面向对象的插件开发
+			//定义Beautifier的构造函数
+			/*var Beautifier = function(ele, opt) {
+			    this.$element = ele,
+			    this.defaults = {
+			        'color': 'red',
+			        'fontSize': '12px',
+			        'textDecoration':'none'
+			    },
+			    this.options = $.extend({}, this.defaults, opt)
+			}
+			//定义Beautifier的方法
+			Beautifier.prototype = {
+			    beautify: function() {
+			        return this.$element.css({
+			            'color': this.options.color,
+			            'fontSize': this.options.fontSize,
+			            'textDecoration': this.options.textDecoration
+			        });
+			    }
+			}
+			//在插件中使用Beautifier对象
+			$.fn.myPlugin = function(options) {
+			    //创建Beautifier的实体
+			    var beautifier = new Beautifier(this, options);
+			    //调用其方法
+			    return beautifier.beautify();
+			}*/
+			
+			//关于命名空间   代码开头加一个分号,避免其他代码未分号结束与我们代码相连，使我们代码无法解析
+			;(function() {
+			    //定义Beautifier的构造函数
+			    var Beautifier = function(ele, opt) {
+			        this.$element = ele,
+			        this.defaults = {
+			            'color': 'red',
+			            'fontSize': '12px',
+			            'textDecoration': 'none'
+			        },
+			        this.options = $.extend({}, this.defaults, opt)
+			    }
+			    //定义Beautifier的方法
+			    Beautifier.prototype = {
+			        beautify: function() {
+			            return this.$element.css({
+			                'color': this.options.color,
+			                'fontSize': this.options.fontSize,
+			                'textDecoration': this.options.textDecoration
+			            });
+			        }
+			    }
+			    //在插件中使用Beautifier对象
+			    $.fn.myPlugin = function(options) {
+			        //创建Beautifier的实体
+			        var beautifier = new Beautifier(this, options);
+			        //调用其方法
+			        return beautifier.beautify();
+			    }
+			})();
+			//同上 将系统变量以参数形式传递到插件内部 
+			//window等系统变量在插件内部就有了一个局部的引用，可以提高访问速度，会有些许性能的提升
+			//得到一个安全，结构良好，组织有序的插件
+			;(function($, window, document,undefined) {
+			    //定义Beautifier的构造函数
+			    var Beautifier = function(ele, opt) {
+			        this.$element = ele,
+			        this.defaults = {
+			            'color': 'red',
+			            'fontSize': '12px',
+			            'textDecoration': 'none'
+			        },
+			        this.options = $.extend({}, this.defaults, opt)
+			    }
+			    //定义Beautifier的方法
+			    Beautifier.prototype = {
+			        beautify: function() {
+			            return this.$element.css({
+			                'color': this.options.color,
+			                'fontSize': this.options.fontSize,
+			                'textDecoration': this.options.textDecoration
+			            });
+			        }
+			    }
+			    //在插件中使用Beautifier对象
+			    $.fn.myPlugin = function(options) {
+			        //创建Beautifier的实体
+			        var beautifier = new Beautifier(this, options);
+			        //调用其方法
+			        return beautifier.beautify();
+			    }
+			})(jQuery, window, document);
+			
+			//现在，我们调用的时候指定颜色，字体大小。
+			$('a').myPlugin({
+			   'color': '#2C9929',
+			     'fontSize': '20px'
+			});
+		</script>
+	</body>
+</html>
